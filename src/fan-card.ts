@@ -69,7 +69,7 @@ export class FanCard extends LitElement {
   // https://lit-element.polymer-project.org/guide/properties
   @property({ attribute: false }) public hass!: HomeAssistant;
   @internalProperty() private config!: FanCardConfig;
-  @internalProperty() private changingSpeed: string = '';
+  @internalProperty() private changingSpeed = '';
 
   // https://lit-element.polymer-project.org/guide/properties#accessors-custom
   public setConfig(config: FanCardConfig): void {
@@ -211,7 +211,7 @@ export class FanCard extends LitElement {
     const selectedSpeed = state.attributes.speed_list[value];
     console.log(selectedSpeed);
 
-    let payload = {
+    const payload = {
       entity_id: "fan.office_ceiling",
       speed: selectedSpeed
     }
