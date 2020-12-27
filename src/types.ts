@@ -7,13 +7,13 @@ import {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "boilerplate-card-editor": LovelaceCardEditor;
+    "fan-card-editor": LovelaceCardEditor;
     "hui-error-card": LovelaceCard;
   }
 }
 
 // TODO Add your configuration elements here for type-checking - OPTIMIZE HERE
-export interface BoilerplateCardConfig extends LovelaceCardConfig {
+export interface FanCardConfig extends LovelaceCardConfig {
   type: string;
   name?: string;
   show_warning?: boolean;

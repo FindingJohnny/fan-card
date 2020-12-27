@@ -24,14 +24,14 @@ import {
 
 import './editor';
 
-import type { BoilerplateCardConfig } from './types';
+import type { FanCardConfig } from './types';
 import { actionHandler } from './action-handler-directive';
 import { CARD_VERSION } from './const';
 import { localize } from './localize/localize';
 
 /* eslint no-console: 0 */
 console.info(
-  `%c  BOILERPLATE-CARD \n%c  ${localize('common.version')} ${CARD_VERSION}    `,
+  `%c  FAN-CARD \n%c  ${localize('common.version')} ${CARD_VERSION}    `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );
@@ -39,8 +39,8 @@ console.info(
 // This puts your card into the UI card picker dialog
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: 'boilerplate-card',
-  name: 'Boilerplate Card',
+  type: 'fan-card',
+  name: 'fan Card',
   description: 'A template custom card for you to create something awesome',
 });
 
@@ -54,11 +54,11 @@ const SpeedDictionary: Record<string, string> = {
 
 // TODO Name your custom element - DONE
 @customElement('fan-card')
-export class BoilerplateCard extends LitElement {
+export class FanCard extends LitElement {
   private _brightnessTimeout?: number;
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    return document.createElement('boilerplate-card-editor');
+    return document.createElement('fan-card-editor');
   }
 
   public static getStubConfig(): object {
@@ -68,11 +68,11 @@ export class BoilerplateCard extends LitElement {
   // TODO Add any properities that should cause your element to re-render here - OPTIMIZE HERE???
   // https://lit-element.polymer-project.org/guide/properties
   @property({ attribute: false }) public hass!: HomeAssistant;
-  @internalProperty() private config!: BoilerplateCardConfig;
+  @internalProperty() private config!: FanCardConfig;
   @internalProperty() private changingSpeed: string = '';
 
   // https://lit-element.polymer-project.org/guide/properties#accessors-custom
-  public setConfig(config: BoilerplateCardConfig): void {
+  public setConfig(config: FanCardConfig): void {
     // TODO Check for required fields and that they are of the proper format - OPTIMIZE HERE
     if (!config) {
       throw new Error(localize('common.invalid_configuration'));
@@ -83,7 +83,7 @@ export class BoilerplateCard extends LitElement {
     }
 
     this.config = {
-      name: 'Boilerplate',
+      name: 'Fan',
       ...config,
     };
   }
