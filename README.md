@@ -28,13 +28,13 @@ Hey dude! Help me out for a couple of :beers: or a :coffee:!
 | name   | string | **Optional** | Title used fo                 | `Friendly Entity Name` |
 | entity | string | **Optional** | Home Assistant fan entity ID. | `none`                 |
 
-[commits-shield]: https://img.shields.io/github/commit-activity/y/custom-cards/fan-card.svg?style=for-the-badge
-[commits]: https://github.com/custom-cards/fan-card/commits/master
+[commits-shield]: https://img.shields.io/github/commit-activity/y/FindingJohnny/fan-card.svg?style=for-the-badge
+[commits]: https://github.com/FindingJohnny/fan-card/commits/master
 [discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
 [forum]: https://community.home-assistant.io/c/projects/frontend
-[license-shield]: https://img.shields.io/github/license/custom-cards/fan-card.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/FindingJohnny/fan-card?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2020.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/custom-cards/fan-card.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/FindingJohnny/fan-card.svg?style=for-the-badge
 
-<!-- [releases]: https://github.com/custom-cards/fan-card/releases -->
+<!-- [releases]: https://github.com/FindingJohnny/fan-card/releases -->
