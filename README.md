@@ -27,6 +27,15 @@ Hey dude! Help me out for a couple of :beers: or a :coffee:!
 | name   | string | **Optional** | Title used fo                 | `Friendly Entity Name` |
 | entity | string | **Optional** | Home Assistant fan entity ID. | `none`                 |
 
+## Special Thanks
+
+Templated from [boilerplate-card](https://github.com/custom-cards/boilerplate-card)
+
+## Notice
+
+- Still in development. May occasionally have debug statements in the console.
+- This is software I write in my freetime to make Home Assistant's UI better for my own personal use! I'm happy to share it! But please know you are using it at your own risk! :)
+
 [commits-shield]: https://img.shields.io/github/commit-activity/y/FindingJohnny/fan-card.svg?style=for-the-badge
 [commits]: https://github.com/FindingJohnny/fan-card/commits/main
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
