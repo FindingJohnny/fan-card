@@ -30,7 +30,6 @@ Hey dude! Help me out for a couple of :beers: or a :coffee:!
 
 [commits-shield]: https://img.shields.io/github/commit-activity/y/FindingJohnny/fan-card.svg?style=for-the-badge
 [commits]: https://github.com/FindingJohnny/fan-card/commits/master
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
 [forum]: https://community.home-assistant.io/c/projects/frontend
 [license-shield]: https://img.shields.io/github/license/FindingJohnny/fan-card?style=for-the-badge
