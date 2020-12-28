@@ -14,9 +14,6 @@ import {
 import {
   HomeAssistant,
   hasConfigOrEntityChanged,
-  hasAction,
-  ActionHandlerEvent,
-  handleAction,
   LovelaceCardEditor,
   getLovelace,
   fireEvent,
@@ -25,7 +22,6 @@ import {
 import './editor';
 
 import type { FanCardConfig } from './types';
-import { actionHandler } from './action-handler-directive';
 import { CARD_VERSION } from './const';
 import { localize } from './localize/localize';
 
@@ -116,10 +112,12 @@ export class FanCard extends LitElement {
     const state = this.hass.states[this.config.entity];
     console.log(state)
 
-    const speedCount = state.attributes.speed_list.length - 1;
-    let currentSpeed = state.attributes.speed;
-    if (SpeedDictionary[currentSpeed]) {
-      currentSpeed = SpeedDictionary[currentSpeed];
+    let speedList: string[] = state.attributes.speed_list;
+    const speedCount = speedList.length - 1;
+    let currentSpeedString = state.attributes.speed;
+    let currentSpeedIndex = speedList.findIndex(currentSpeedString);
+    if (SpeedDictionary[currentSpeedString]) {
+      currentSpeedString = SpeedDictionary[currentSpeedString];
     }
 
     const name = this.config.name;
@@ -127,6 +125,8 @@ export class FanCard extends LitElement {
     if (SpeedDictionary[localizedChangingSpeed]) {
       localizedChangingSpeed = SpeedDictionary[localizedChangingSpeed];
     }
+    console.log('currentSpeedIndex');
+    console.log(currentSpeedIndex);
 
     return html`
       <ha-card>
@@ -142,7 +142,7 @@ export class FanCard extends LitElement {
         <div class="content">
           <div id="controls" class="container">
             <div id="slider">
-              <round-slider value="0" step="1" min="0" max="${speedCount}" valuelabel="Temperature" @value-changing="${this._sliderValueChanging}}" @value-changed="${this._sliderValueChanged}}"></round-slider>
+              <round-slider class='test' value="${currentSpeedIndex}" step="1" min="0" max="${speedCount}" valuelabel="Temperature" @value-changing="${this._sliderValueChanging}}" @value-changed="${this._sliderValueChanged}}"></round-slider>
               <ha-icon-button class="fan-button" icon="hass:fan"></ha-icon-button>
             </div>
           </div>
@@ -155,7 +155,7 @@ export class FanCard extends LitElement {
     `;
   }
 
-  private _sliderValueChanging(e: any) {
+  private _sliderValueChanging(e: any): void {
     const value = e.detail.value;
 
     if (!this.config || !this.hass || !this.config.entity) {
@@ -197,7 +197,7 @@ export class FanCard extends LitElement {
     }, 500);
   }
 
-  private _sliderValueChanged(e: any) {
+  private _sliderValueChanged(e: any): void {
     console.log(e);
     const value = e.detail.value;
     console.log(value);
@@ -212,23 +212,19 @@ export class FanCard extends LitElement {
     console.log(selectedSpeed);
 
     const payload = {
+      //eslint-disable-next-line @typescript-eslint/camelcase
       entity_id: "fan.office_ceiling",
       speed: selectedSpeed
     }
     this.hass.callService("fan", "set_speed", payload);
   }
 
-  private _handleMoreInfo() {
+  private _handleMoreInfo(): void {
     fireEvent(this, "hass-more-info", {
       entityId: this.config!.entity!,
     });
   }
 
-  private _handleAction(ev: ActionHandlerEvent): void {
-    if (this.hass && this.config && ev.detail.action) {
-      handleAction(this, this.hass, this.config, ev.detail.action);
-    }
-  }
 
   private _showWarning(warning: string): TemplateResult {
     return html`
