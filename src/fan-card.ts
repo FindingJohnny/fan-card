@@ -115,7 +115,10 @@ export class FanCard extends LitElement {
     let speedList: string[] = state.attributes.speed_list;
     const speedCount = speedList.length - 1;
     let currentSpeedString = state.attributes.speed;
-    let currentSpeedIndex = speedList.findIndex(currentSpeedString);
+    console.log(`current speed string: ${currentSpeedString}`)
+    console.log(`current speed list: ${speedList}`)
+    let currentSpeedIndex = speedList.indexOf(currentSpeedString);
+    console.log(`current speed index: ${currentSpeedIndex}`)
     if (SpeedDictionary[currentSpeedString]) {
       currentSpeedString = SpeedDictionary[currentSpeedString];
     }
