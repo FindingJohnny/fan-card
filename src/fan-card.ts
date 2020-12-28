@@ -1,4 +1,4 @@
-import { mdiDotsVertical } from "@mdi/js";
+import { mdiDotsVertical, mdiFan } from "@mdi/js";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   LitElement,
@@ -19,6 +19,7 @@ import {
   fireEvent,
 } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types
 
+import { styles } from "./styles";
 import './editor';
 
 import type { FanCardConfig } from './types';
@@ -51,7 +52,7 @@ const SpeedDictionary: Record<string, string> = {
 // TODO Name your custom element - DONE
 @customElement('fan-card')
 export class FanCard extends LitElement {
-  private _brightnessTimeout?: number;
+  private _fanSpeedTimeout?: number;
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('fan-card-editor');
@@ -65,7 +66,7 @@ export class FanCard extends LitElement {
   // https://lit-element.polymer-project.org/guide/properties
   @property({ attribute: false }) public hass!: HomeAssistant;
   @internalProperty() private config!: FanCardConfig;
-  @internalProperty() private changingSpeed = '';
+  @internalProperty() private currentFanSpeedIndex: number = -1;
 
   // https://lit-element.polymer-project.org/guide/properties#accessors-custom
   public setConfig(config: FanCardConfig): void {
@@ -95,41 +96,26 @@ export class FanCard extends LitElement {
 
   // https://lit-element.polymer-project.org/guide/templates
   protected render(): TemplateResult | void {
-    // TODO Check for stateObj or other necessary things and render a warning if missing - OPTIMIZE HERE
-    if (this.config.show_warning) {
-      return this._showWarning(localize('common.show_warning'));
-    }
-
-    if (this.config.show_error) {
-      return this._showError(localize('common.show_error'));
-    }
-
+    console.log('RENDERING');
     if (!this.config || !this.hass || !this.config.entity) {
       return;
     }
 
-    console.log(this.config.entity);
     const state = this.hass.states[this.config.entity];
-    console.log(state)
-
-    let speedList: string[] = state.attributes.speed_list;
+    const speedList: string[] = state.attributes.speed_list;
     const speedCount = speedList.length - 1;
+    const name = this.config.name;
     let currentSpeedString = state.attributes.speed;
-    console.log(`current speed string: ${currentSpeedString}`)
-    console.log(`current speed list: ${speedList}`)
-    let currentSpeedIndex = speedList.indexOf(currentSpeedString);
-    console.log(`current speed index: ${currentSpeedIndex}`)
-    if (SpeedDictionary[currentSpeedString]) {
-      currentSpeedString = SpeedDictionary[currentSpeedString];
+    let localizedChangingSpeed = currentSpeedString;
+
+    if (this.currentFanSpeedIndex === -1) {
+      console.log('Update Speed');
+      this.currentFanSpeedIndex = speedList.indexOf(state.attributes.speed);
     }
 
-    const name = this.config.name;
-    let localizedChangingSpeed = this.changingSpeed;
     if (SpeedDictionary[localizedChangingSpeed]) {
       localizedChangingSpeed = SpeedDictionary[localizedChangingSpeed];
     }
-    console.log('currentSpeedIndex');
-    console.log(currentSpeedIndex);
 
     return html`
       <ha-card>
@@ -145,8 +131,16 @@ export class FanCard extends LitElement {
         <div class="content">
           <div id="controls" class="container">
             <div id="slider">
-              <round-slider class='test' value="${currentSpeedIndex}" step="1" min="0" max="${speedCount}" valuelabel="Temperature" @value-changing="${this._sliderValueChanging}}" @value-changed="${this._sliderValueChanged}}"></round-slider>
-              <ha-icon-button class="fan-button" icon="hass:fan"></ha-icon-button>
+              <round-slider class='test' value="${this.currentFanSpeedIndex}" step="1" min="0" max="${speedCount}" valuelabel="Temperature" @value-changing="${this._sliderValueChanging}}" @value-changed="${this._sliderValueChanged}}"></round-slider>
+              <!-- <ha-icon-button class="fan-button" icon="hass:fan"></ha-icon-button> -->
+              <mwc-icon-button
+                label="Open more info"
+                @click=${this._handleMoreInfo}
+                tabindex="0"
+                class="fan-button"
+              >
+                <ha-svg-icon id="fan-icon" class="${this.getFanAnimationClass(this.currentFanSpeedIndex)}" .path=${mdiFan}></ha-svg-icon>
+              </mwc-icon-button>
             </div>
           </div>
           <div id="info">
@@ -168,32 +162,26 @@ export class FanCard extends LitElement {
     const state = this.hass.states[this.config.entity];
     let selectedSpeed = state.attributes.speed_list[value];
 
-    if (this.changingSpeed !== selectedSpeed) {
-      if (SpeedDictionary[selectedSpeed]) {
-        selectedSpeed = SpeedDictionary[selectedSpeed];
-      }
-      this.changingSpeed = selectedSpeed;
-      console.log(selectedSpeed);
-      console.log(e);
-      console.log(value);
+    if (SpeedDictionary[selectedSpeed]) {
+      selectedSpeed = SpeedDictionary[selectedSpeed];
     }
 
     this.shadowRoot!.querySelector(
       ".speed"
-    )!.innerHTML = `${this.changingSpeed}`;
+    )!.innerHTML = `${selectedSpeed}`;
     this._showSpeed();
     this._hideSpeed();
   }
 
   private _showSpeed(): void {
-    clearTimeout(this._brightnessTimeout);
+    clearTimeout(this._fanSpeedTimeout);
     this.shadowRoot!.querySelector(".speed")!.classList.add(
       "show_speed"
     );
   }
 
   private _hideSpeed(): void {
-    this._brightnessTimeout = window.setTimeout(() => {
+    this._fanSpeedTimeout = window.setTimeout(() => {
       this.shadowRoot!.querySelector(".speed")!.classList.remove(
         "show_speed"
       );
@@ -202,24 +190,54 @@ export class FanCard extends LitElement {
 
   private _sliderValueChanged(e: any): void {
     console.log(e);
-    const value = e.detail.value;
-    console.log(value);
-
-    if (!this.config || !this.hass || !this.config.entity) {
-      return;
-    }
-
+    const sliderValue = e.detail.value;
     const state = this.hass.states[this.config.entity];
+    const selectedSpeed = state.attributes.speed_list[sliderValue];
 
-    const selectedSpeed = state.attributes.speed_list[value];
-    console.log(selectedSpeed);
+    console.log(`Slider Value: ${sliderValue}`);
+    console.log(`this.currentFanSpeedIndex: ${this.currentFanSpeedIndex}`);
+    this.currentFanSpeedIndex = sliderValue;
+    console.log(`this.currentFanSpeedIndex: ${this.currentFanSpeedIndex}`);
 
     const payload = {
       //eslint-disable-next-line @typescript-eslint/camelcase
-      entity_id: "fan.office_ceiling",
+      entity_id: this.config.entity,
       speed: selectedSpeed
     }
     this.hass.callService("fan", "set_speed", payload);
+  }
+
+  private getFanAnimationClass(fanSpeedIndex: number): string {
+    console.log(`Fan Speed Index: ${fanSpeedIndex}`);
+    if (!this.config.should_animate) {
+      return 'rotate-off';
+    }
+    switch (fanSpeedIndex) {
+      case 0: { // OFF
+        console.log('Off');
+        return 'rotate-off';
+      }
+      case 1: { // LOW
+        console.log('Low');
+        return 'rotate-low';
+      }
+      case 2: { // MEDIUM
+        console.log('Medium');
+        return 'rotate-medium';
+      }
+      case 3: { // MEDIUM_HIGH
+        console.log('Medium_high')
+        return 'rotate-medium-high';
+      }
+      case 4: { // HIGH
+        console.log('High');
+        return 'rotate-high';
+      }
+      default: {
+        console.log('Default');
+        return 'rotate-off'
+      }
+    }
   }
 
   private _handleMoreInfo(): void {
@@ -228,108 +246,8 @@ export class FanCard extends LitElement {
     });
   }
 
-
-  private _showWarning(warning: string): TemplateResult {
-    return html`
-      <hui-warning>${warning}</hui-warning>
-    `;
-  }
-
-  private _showError(error: string): TemplateResult {
-    const errorCard = document.createElement('hui-error-card');
-    errorCard.setConfig({
-      type: 'error',
-      error,
-      origConfig: this.config,
-    });
-
-    return html`
-      ${errorCard}
-    `;
-  }
-
   // https://lit-element.polymer-project.org/guide/styles
   static get styles(): CSSResult {
-    return css`
-      ha-card {
-        height: 100%;
-        box-sizing: border-box;
-        position: relative;
-        overflow: hidden;
-        text-align: center;
-        --name-font-size: 1.2rem;
-        --brightness-font-size: 1.2rem;
-      }
-
-      .more-info {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        right: 0;
-        border-radius: 100%;
-        color: var(--secondary-text-color);
-        z-index: 1;
-      }
-
-      .content {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-
-      #controls {
-        display: flex;
-        justify-content: center;
-        padding: 16px;
-        position: relative;
-      }
-
-      #slider {
-        height: 100%;
-        width: 100%;
-        position: relative;
-        max-width: 200px;
-        min-width: 100px;
-      }
-
-      round-slider {
-        --round-slider-path-color: var(--disabled-text-color);
-        --round-slider-bar-color: var(--primary-color);
-        padding-bottom: 10%;
-      }
-
-      .fan-button {
-        color: var(--paper-item-icon-color, #44739e);
-        width: 60%;
-        height: auto;
-        position: absolute;
-        max-width: calc(100% - 40px);
-        box-sizing: border-box;
-        border-radius: 100%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        --mdc-icon-button-size: 100%;
-        --mdc-icon-size: 100%;
-      }
-
-      #info {
-        text-align: center;
-        margin-top: -56px;
-        padding: 16px;
-        font-size: var(--name-font-size);
-      }
-
-      .speed {
-        font-size: var(--brightness-font-size);
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out 0s;
-      }
-
-      .show_speed {
-        opacity: 1;
-      }
-    `;
+    return styles;
   }
 }
